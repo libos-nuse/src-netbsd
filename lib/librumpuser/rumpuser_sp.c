@@ -61,6 +61,7 @@ __RCSID("$NetBSD: rumpuser_sp.c,v 1.68 2014/12/08 00:12:03 justin Exp $");
 
 #include <rump/rump.h> /* XXX: for rfork flags */
 #include <rump/rumpuser.h>
+#include "nuse-hostcalls.h"
 
 #include "rumpuser_int.h"
 
@@ -140,6 +141,9 @@ struct prefork {
 static LIST_HEAD(, prefork) preforks = LIST_HEAD_INITIALIZER(preforks);
 static pthread_mutex_t pfmtx;
 
+/* XXX: TLS... */
+__thread struct spclient *th_spc = NULL;
+
 /*
  * This version is for the server.  It's optimized for multiple threads
  * and is *NOT* reentrant wrt to signals.
@@ -195,7 +199,8 @@ static int
 lwproc_rfork(struct spclient *spc, int flags, const char *comm)
 {
 	int rv;
-
+	/* XXX */
+	return 0;
 	rumpuser__hyp.hyp_schedule();
 	rv = rumpuser__hyp.hyp_lwproc_rfork(spc, flags, comm);
 	rumpuser__hyp.hyp_unschedule();
@@ -207,6 +212,8 @@ static int
 lwproc_newlwp(pid_t pid)
 {
 	int rv;
+	/* XXX */
+	return 0;
 
 	rumpuser__hyp.hyp_schedule();
 	rv = rumpuser__hyp.hyp_lwproc_newlwp(pid);
@@ -219,6 +226,8 @@ static struct lwp *
 lwproc_curlwp(void)
 {
 	struct lwp *l;
+	/* XXX */
+	return NULL;
 
 	rumpuser__hyp.hyp_schedule();
 	l = rumpuser__hyp.hyp_lwproc_curlwp();
@@ -615,17 +624,17 @@ serv_handleconn(int fd, connecthook_fn connhook, int busy)
 	unsigned i;
 
 	/*LINTED: cast ok */
-	newfd = accept(fd, (struct sockaddr *)&ss, &sl);
+	newfd = host_accept(fd, (struct sockaddr *)&ss, &sl);
 	if (newfd == -1)
 		return 0;
 
 	if (busy) {
-		close(newfd); /* EBUSY */
+		host_close(newfd); /* EBUSY */
 		return 0;
 	}
 
-	flags = fcntl(newfd, F_GETFL, 0);
-	if (fcntl(newfd, F_SETFL, flags | O_NONBLOCK) == -1) {
+	flags = host_fcntl(newfd, F_GETFL, 0);
+	if (host_fcntl(newfd, F_SETFL, flags | O_NONBLOCK) == -1) {
 		close(newfd);
 		return 0;
 	}
@@ -636,7 +645,7 @@ serv_handleconn(int fd, connecthook_fn connhook, int busy)
 	}
 
 	/* write out a banner for the client */
-	if (send(newfd, banner, strlen(banner), MSG_NOSIGNAL)
+	if (host_send(newfd, banner, strlen(banner), MSG_NOSIGNAL)
 	    != (ssize_t)strlen(banner)) {
 		close(newfd);
 		return 0;
@@ -768,6 +777,8 @@ serv_workbouncer(void *arg)
 		nwork--;
 		pthread_mutex_unlock(&sbamtx);
 
+		/* XXX: store spclient thread-local-storage, omg... */
+		th_spc = sba->sba_spc;
 		if (__predict_true(sba->sba_type == SBA_SYSCALL)) {
 			serv_handlesyscall(sba->sba_spc,
 			    &sba->sba_hdr, sba->sba_data);
@@ -1338,7 +1349,7 @@ rumpuser_sp_init(const char *url,
 	snprintf(banner, sizeof(banner), "RUMPSP-%d.%d-%s-%s/%s\n",
 	    PROTOMAJOR, PROTOMINOR, ostype, osrelease, machine);
 
-	s = socket(parsetab[idx].domain, SOCK_STREAM, 0);
+	s = host_socket(parsetab[idx].domain, SOCK_STREAM, 0);
 	if (s == -1) {
 		error = errno;
 		goto out;
@@ -1360,18 +1371,18 @@ rumpuser_sp_init(const char *url,
 	/* sloppy error recovery */
 
 	/*LINTED*/
-	if (bind(s, sap, parsetab[idx].slen) == -1) {
+	if (host_bind(s, sap, parsetab[idx].slen) == -1) {
 		error = errno;
 		fprintf(stderr, "rump_sp: server bind failed\n");
 		goto out;
 	}
-	if (listen(s, MAXCLI) == -1) {
+	if (host_listen(s, MAXCLI) == -1) {
 		error = errno;
 		fprintf(stderr, "rump_sp: server listen failed\n");
 		goto out;
 	}
 
-	if ((error = pthread_create(&pt, NULL, spserver, sarg)) != 0) {
+	if ((error = host_pthread_create(&pt, NULL, spserver, sarg)) != 0) {
 		fprintf(stderr, "rump_sp: cannot create wrkr thread\n");
 		goto out;
 	}

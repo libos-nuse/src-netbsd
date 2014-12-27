@@ -1,0 +1,4 @@
+*.cmd
+*.o
+config.log
+config.status

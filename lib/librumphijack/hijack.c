@@ -76,7 +76,7 @@ __RCSID("$NetBSD: hijack.c,v 1.111 2014/11/04 19:05:17 pooka Exp $");
 #include <time.h>
 #include <unistd.h>
 
-#include <rump/rumpclient.h>
+#include <librumpclient/rumpclient.h>
 #include <rump/rump_syscalls.h>
 
 #include "hijack.h"
@@ -879,7 +879,7 @@ rcinit(void)
 			errx(1, "hostcall %s not found!",
 			    syscnames[j].scm_hostname);
 
-		syscalls[i].bs_rump = dlsym(RTLD_NEXT,
+		syscalls[i].bs_rump = dlsym(RTLD_DEFAULT,
 		    syscnames[j].scm_rumpname);
 		if (syscalls[i].bs_rump == NULL)
 			errx(1, "rumpcall %s not found!",

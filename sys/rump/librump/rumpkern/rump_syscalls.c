@@ -27,8 +27,8 @@ __KERNEL_RCSID(0, "$NetBSD: rump_syscalls.c,v 1.104 2014/07/25 08:27:36 dholland
 #include <stdlib.h>
 #include <string.h>
 
-#include <srcsys/syscall.h>
-#include <srcsys/syscallargs.h>
+#include <sys/syscall.h>
+#include <sys/syscallargs.h>
 
 #include <rump/rumpclient.h>
 
