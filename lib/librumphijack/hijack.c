@@ -879,7 +879,7 @@ rcinit(void)
 			errx(1, "hostcall %s not found!",
 			    syscnames[j].scm_hostname);
 
-		syscalls[i].bs_rump = dlsym(RTLD_DEFAULT,
+		syscalls[i].bs_rump = dlsym(RTLD_NEXT,
 		    syscnames[j].scm_rumpname);
 		if (syscalls[i].bs_rump == NULL)
 			errx(1, "rumpcall %s not found!",
