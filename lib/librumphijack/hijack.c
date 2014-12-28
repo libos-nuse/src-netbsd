@@ -76,7 +76,7 @@ __RCSID("$NetBSD: hijack.c,v 1.111 2014/11/04 19:05:17 pooka Exp $");
 #include <time.h>
 #include <unistd.h>
 
-#include <librumpclient/rumpclient.h>
+#include <rump/rumpclient.h>
 #include <rump/rump_syscalls.h>
 
 #include "hijack.h"

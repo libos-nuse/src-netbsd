@@ -2,3 +2,5 @@
 *.o
 config.log
 config.status
+rumpuser_config.h
+
