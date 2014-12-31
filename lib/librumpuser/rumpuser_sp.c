@@ -199,8 +199,7 @@ static int
 lwproc_rfork(struct spclient *spc, int flags, const char *comm)
 {
 	int rv;
-	/* XXX */
-	return 0;
+
 	rumpuser__hyp.hyp_schedule();
 	rv = rumpuser__hyp.hyp_lwproc_rfork(spc, flags, comm);
 	rumpuser__hyp.hyp_unschedule();
@@ -212,8 +211,6 @@ static int
 lwproc_newlwp(pid_t pid)
 {
 	int rv;
-	/* XXX */
-	return 0;
 
 	rumpuser__hyp.hyp_schedule();
 	rv = rumpuser__hyp.hyp_lwproc_newlwp(pid);
@@ -226,8 +223,6 @@ static struct lwp *
 lwproc_curlwp(void)
 {
 	struct lwp *l;
-	/* XXX */
-	return NULL;
 
 	rumpuser__hyp.hyp_schedule();
 	l = rumpuser__hyp.hyp_lwproc_curlwp();
