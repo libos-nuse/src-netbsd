@@ -1,5 +1,7 @@
 *.cmd
 *.o
+*.gcno
+*.gcda
 config.log
 config.status
 rumpuser_config.h
