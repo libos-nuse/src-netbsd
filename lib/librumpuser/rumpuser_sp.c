@@ -61,7 +61,6 @@ __RCSID("$NetBSD: rumpuser_sp.c,v 1.69 2015/02/04 12:55:47 pooka Exp $");
 
 #include <rump/rump.h> /* XXX: for rfork flags */
 #include <rump/rumpuser.h>
-#include "nuse-hostcalls.h"
 
 #include "rumpuser_int.h"
 
@@ -619,17 +618,17 @@ serv_handleconn(int fd, connecthook_fn connhook, int busy)
 	unsigned i;
 
 	/*LINTED: cast ok */
-	newfd = host_accept(fd, (struct sockaddr *)&ss, &sl);
+	newfd = accept(fd, (struct sockaddr *)&ss, &sl);
 	if (newfd == -1)
 		return 0;
 
 	if (busy) {
-		host_close(newfd); /* EBUSY */
+		close(newfd); /* EBUSY */
 		return 0;
 	}
 
-	flags = host_fcntl(newfd, F_GETFL, 0);
-	if (host_fcntl(newfd, F_SETFL, flags | O_NONBLOCK) == -1) {
+	flags = fcntl(newfd, F_GETFL, 0);
+	if (fcntl(newfd, F_SETFL, flags | O_NONBLOCK) == -1) {
 		close(newfd);
 		return 0;
 	}
@@ -640,7 +639,7 @@ serv_handleconn(int fd, connecthook_fn connhook, int busy)
 	}
 
 	/* write out a banner for the client */
-	if (host_send(newfd, banner, strlen(banner), MSG_NOSIGNAL)
+	if (send(newfd, banner, strlen(banner), MSG_NOSIGNAL)
 	    != (ssize_t)strlen(banner)) {
 		close(newfd);
 		return 0;
@@ -1344,7 +1343,7 @@ rumpuser_sp_init(const char *url,
 	snprintf(banner, sizeof(banner), "RUMPSP-%d.%d-%s-%s/%s\n",
 	    PROTOMAJOR, PROTOMINOR, ostype, osrelease, machine);
 
-	s = host_socket(parsetab[idx].domain, SOCK_STREAM, 0);
+	s = socket(parsetab[idx].domain, SOCK_STREAM, 0);
 	if (s == -1) {
 		error = errno;
 		goto out;
@@ -1366,18 +1365,18 @@ rumpuser_sp_init(const char *url,
 	/* sloppy error recovery */
 
 	/*LINTED*/
-	if (host_bind(s, sap, parsetab[idx].slen) == -1) {
+	if (bind(s, sap, parsetab[idx].slen) == -1) {
 		error = errno;
 		fprintf(stderr, "rump_sp: failed to bind to URL %s\n", url);
 		goto out;
 	}
-	if (host_listen(s, MAXCLI) == -1) {
+	if (listen(s, MAXCLI) == -1) {
 		error = errno;
 		fprintf(stderr, "rump_sp: server listen failed\n");
 		goto out;
 	}
 
-	if ((error = host_pthread_create(&pt, NULL, spserver, sarg)) != 0) {
+	if ((error = pthread_create(&pt, NULL, spserver, sarg)) != 0) {
 		fprintf(stderr, "rump_sp: cannot create wrkr thread\n");
 		goto out;
 	}

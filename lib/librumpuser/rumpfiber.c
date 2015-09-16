@@ -1007,7 +1007,7 @@ rumpuser_cv_has_waiters(struct rumpuser_cv *cv, int *rvp)
  */
 
 void
-rumpuser_curlwpop(enum rumplwpop enum_rumplwpop, struct lwp *l)
+rumpuser_curlwpop(int enum_rumplwpop, struct lwp *l)
 {
 	struct thread *thread;
 	enum rumplwpop op = enum_rumplwpop;

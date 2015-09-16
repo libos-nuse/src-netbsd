@@ -180,7 +180,7 @@ enum rumplwpop {
 	RUMPUSER_LWP_CREATE, RUMPUSER_LWP_DESTROY,
 	RUMPUSER_LWP_SET, RUMPUSER_LWP_CLEAR
 };
-void rumpuser_curlwpop(enum rumplwpop, struct lwp *);
+void rumpuser_curlwpop(int, struct lwp *);
 struct lwp *rumpuser_curlwp(void);
 #endif /* LIBRUMPUSER || RUMP__CURLWP_PRIVATE */
 
