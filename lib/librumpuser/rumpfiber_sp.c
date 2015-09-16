@@ -40,6 +40,9 @@ __RCSID("$NetBSD: rumpfiber_sp.c,v 1.4 2015/02/15 00:54:32 justin Exp $");
 
 #include "rumpfiber.h"
 
+/* XXX: TLS... */
+__thread struct spclient *th_spc = NULL;
+
 /*ARGSUSED*/
 int
 rumpuser_sp_init(const char *url,

@@ -711,7 +711,7 @@ rumpuser_curlwp(void)
 #else
 
 void
-rumpuser_curlwpop(int enum_rumplwpop, struct lwp *l)
+rumpuser_curlwpop(enum rumplwpop enum_rumplwpop, struct lwp *l)
 {
 	enum rumplwpop op = enum_rumplwpop;
 
