@@ -73,6 +73,7 @@ __RCSID("$NetBSD: rumpfiber.c,v 1.12 2015/02/15 00:54:32 justin Exp $");
 
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/queue.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -148,7 +149,7 @@ schedule(void)
 		tm = now();	
 		wakeup = tm + 1000; /* wake up in 1s max */
 		next = NULL;
-		TAILQ_FOREACH_SAFE(thread, &thread_list, thread_list, tmp) {
+		TAILQ_FOREACH(thread, &thread_list, thread_list) {
 			if (!is_runnable(thread) && thread->wakeup_time >= 0) {
 				if (thread->wakeup_time <= tm) {
 					thread->flags |= THREAD_TIMEDOUT;
@@ -178,7 +179,7 @@ schedule(void)
 	if (prev != next)
 		switch_threads(prev, next);
 
-	TAILQ_FOREACH_SAFE(thread, &exited_threads, thread_list, tmp) {
+	TAILQ_FOREACH(thread, &exited_threads, thread_list) {
 		if (thread != prev) {
 			TAILQ_REMOVE(&exited_threads, thread, thread_list);
 			if ((thread->flags & THREAD_EXTSTACK) == 0)
