@@ -653,10 +653,10 @@ rumpuser_thread_create(void *(*f)(void *), void *arg, const char *thrname,
 	 * _ensure_ it's set before the thread runs (and could exit).
 	 * now we're trusting unclear semantics of create_thread()
 	 */
-	if (thr && joinable)
+	if (thr && joinable) {
 		thr->flags |= THREAD_MUSTJOIN;
-
-	*tptr = thr;
+		*tptr = thr;
+	}
 	return 0;
 }
 
