@@ -610,7 +610,7 @@ wait(struct waithead *wh, uint64_t msec)
 	if (w.onlist)
 		TAILQ_REMOVE(wh, &w, entries);
 
-	return w.onlist ? ETIMEDOUT : 0;
+	return w.onlist ? rumpuser__errtrans(ETIMEDOUT) : 0;
 }
 
 static void
