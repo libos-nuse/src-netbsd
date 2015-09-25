@@ -92,6 +92,12 @@ __RCSID("$NetBSD: rumpfiber.c,v 1.12 2015/02/15 00:54:32 justin Exp $");
 #include "rumpuser_int.h"
 #include "rumpfiber.h"
 
+#define TAILQ_END(head)                 (NULL)
+#define TAILQ_FOREACH_SAFE(var, head, field, next)                      \
+        for ((var) = ((head)->tqh_first);                               \
+            (var) != TAILQ_END(head) &&                                 \
+            ((next) = TAILQ_NEXT(var, field), 1); (var) = (next))
+
 static void init_sched(void);
 static void join_thread(struct thread *);
 static void switch_threads(struct thread *prev, struct thread *next);
@@ -149,7 +155,7 @@ schedule(void)
 		tm = now();	
 		wakeup = tm + 1000; /* wake up in 1s max */
 		next = NULL;
-		TAILQ_FOREACH(thread, &thread_list, thread_list) {
+		TAILQ_FOREACH_SAFE(thread, &thread_list, thread_list, tmp) {
 			if (!is_runnable(thread) && thread->wakeup_time >= 0) {
 				if (thread->wakeup_time <= tm) {
 					thread->flags |= THREAD_TIMEDOUT;
@@ -179,7 +185,7 @@ schedule(void)
 	if (prev != next)
 		switch_threads(prev, next);
 
-	TAILQ_FOREACH(thread, &exited_threads, thread_list) {
+	TAILQ_FOREACH_SAFE(thread, &exited_threads, thread_list, tmp) {
 		if (thread != prev) {
 			TAILQ_REMOVE(&exited_threads, thread, thread_list);
 			if ((thread->flags & THREAD_EXTSTACK) == 0)
