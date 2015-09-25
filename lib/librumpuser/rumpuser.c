@@ -140,6 +140,8 @@ rumpuser_clock_sleep(int enum_rumpclock, int64_t sec, long nsec)
 #ifdef HAVE_CLOCK_NANOSLEEP
 			rv = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME,
 			    &rqt, NULL);
+			if (rv)
+				errno = rv; rv = -1;
 #else
 			/* le/la/der/die/das sigh. timevalspec tailspin */
 			struct timespec ts, tsr;
